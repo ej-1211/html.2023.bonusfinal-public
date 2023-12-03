@@ -24,11 +24,15 @@ args = parser.parse_args()
 api_keyA = input('Your OpenAI API key: ')  # OpenAI API key 1 TODO. config
 api_keyB = input('Yout OpenAI API key: ')  # OpenAI API key 2 TODO. config
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 # set config of agents
 subject = args.subject
 output = args.output
 # model: https://stackoverflow.com/questions/75396481/openai-gpt-3-api-error-this-models-maximum-context-length-is-4097-tokens
+<<<<<<< HEAD
 agent_configA = {'name': 'Agent-A',
                  "argument_strength": '0.9',
                  'llm_config': 
@@ -43,6 +47,18 @@ agent_configB = {'name': 'Agent-B',
 # build agents
 agentA = Agent(name=agent_configA['name'], api_key=api_keyA,system_message=None, llm_config=agent_configA['llm_config'])
 agentB = Agent(name=agent_configB['name'], api_key=api_keyB,system_message=None, llm_config=agent_configB['llm_config'])
+=======
+agent_configA = {'name': 'Agent-A', "argument_strength": '0.9',
+                 'llm_config': {'model': 'gpt-3.5-turbo-16k'}}  # TODO. flexible w\ UI
+agent_configB = {'name': 'Agent-B', "argument_strength": '0.9',
+                 'llm_config': {'model': 'gpt-3.5-turbo-16k'}}  # TODO. flexible w\ UI
+
+# build agents
+agentA = Agent(name=agent_configA['name'], api_key=api_keyA,
+               system_message=None, llm_config=agent_configA['llm_config'])
+agentB = Agent(name=agent_configB['name'], api_key=api_keyB,
+               system_message=None, llm_config=agent_configB['llm_config'])
+>>>>>>> origin/main
 # print the current round of the debate
 
 
