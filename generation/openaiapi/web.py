@@ -84,7 +84,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     4. Return the response
     '''
     # log the question to the log file
-    with open(f'{config.topic}.log', 'a') as f:
+    with open(f'generation/openaiapi/result/{config.topic}.log', 'a') as f:
         f.write('\n')
         f.write(f"[{stage}] Moderator: \n")
         f.write(f'{Question}\n')
@@ -113,7 +113,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
             # split the raw_response by "\n" and log it to another file
             response_ = raw_response.split('\n')
             print(f"Q{stage}/30 is answered by Agent")
-            with open(f'{config.topic}.log', 'a') as f:
+            with open(f'generation/openaiapi/result/{config.topic}.log', 'a') as f:
                 f.write(f"[{stage}]: \n")
                 for line in response_:
                     f.write(f'{line}\n')
@@ -406,7 +406,7 @@ try :
         SyntaxError
 
     # save the data
-    with open(f'{config.topic}.csv', 'w', newline='') as f:
+    with open(f'generation/openaiapi/result/{config.topic}.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(final)
 except:

@@ -1,29 +1,69 @@
 # Config File
 import json
+import csv
 
-subject = "Do humans have free will?"
-topic = "free_will"
+# read the subject and topic from another file called subjects-public.csv and store them in a dictionary
+subjects_topics = {}
+with open('subjects-public.csv', newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    count = 1
+    for row in reader:
+        print(count,row['name'], row['subject'])
+        count += 1
+        # add the key as the count and the value as the subject
+        subjects_topics[str(count)] = {
+            'subject': row['subject'],
+            'topic': row['name']
+            }
+        # add the name as well
+
+    # add the key as the count and the value as the subject
+
+# Prompt the user to select a subject
+print("Please select a subject from the following list:")
+for key in subjects_topics:
+    print(key, subjects_topics[key]['subject'])
+subject_num = input("Subject Number: ")
+
+
+subject = subjects_topics[subject_num]['subject']
+topic = subjects_topics[subject_num]['topic']
+print("\n"*100)
+print(f"Subject: {subject}")
+print(f"Topic: {topic}")
+print("--------------START THE DEBATE!--------------")
+# clear the console
+
+
+gpt_model = "gpt-3.5-turbo-16k"
+frequency_penalty = 0
+n = 1
+presence_penalty = 0
+temperature = 1
+top_p = 1
+
 
 def llm_config():
     llm_config = f"""{{
        "subject": "{subject}",
        "Agent-A": {{
-           "model": "gpt-3.5-turbo-16k",
-           "frequency_penalty": 0,
-           "n": 1,
-           "presence_penalty": 0,
-           "temperature": 1,
-           "top_p": 1
+           "model": "{gpt_model}",
+           "frequency_penalty": {frequency_penalty},
+           "n": {n},
+           "presence_penalty": {presence_penalty},
+           "temperature": {temperature},
+           "top_p": {top_p}
        }},
        "Agent-B": {{
-           "model": "gpt-3.5-turbo-16k",
-           "frequency_penalty": 0,
-           "n": 1,
-           "presence_penalty": 0,
-           "temperature": 1,
-           "top_p": 1
+           "model": "{gpt_model}",
+           "frequency_penalty": {frequency_penalty},
+           "n": {n},
+           "presence_penalty": {presence_penalty},
+           "temperature": {temperature},
+           "top_p": {top_p}
        }}
     }}"""
+    return llm_config
 
     # format the llm_config and print out the result
     llm_config_ = json.loads(llm_config)
