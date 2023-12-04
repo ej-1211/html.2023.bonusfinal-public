@@ -2,4 +2,12 @@ socrasynthLite
 
 __pyache__
 
+
+
 .DS_Store
+
+.log
+
+generation/openaiapi/result/*.csv
+generation/openaiapi/result/*.log
+generation/openaiapi/__pyache__

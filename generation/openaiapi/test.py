@@ -16,79 +16,85 @@
 # print(config.Q8 + response)
 
 
-response_A = """
-Agent-A: "Closing statements:
+# response_A = """
+# Agent-A: "Closing statements:
 
-1. Near-Death Experiences: While near-death experiences may have alternative explanations, the consistent elements reported across cultures suggest the possibility of transcendent experiences that point towards an afterlife.
+# 1. Near-Death Experiences: While near-death experiences may have alternative explanations, the consistent elements reported across cultures suggest the possibility of transcendent experiences that point towards an afterlife.
 
-2. Philosophical Arguments: Philosophical discussions provide a foundation for contemplating the existence of an afterlife, acknowledging that while conclusive proof may be elusive, reasoned exploration expands our understanding of the possibilities of an afterlife beyond empirical evidence.
+# 2. Philosophical Arguments: Philosophical discussions provide a foundation for contemplating the existence of an afterlife, acknowledging that while conclusive proof may be elusive, reasoned exploration expands our understanding of the possibilities of an afterlife beyond empirical evidence.
 
-3. Scientific Evidence: While scientific research operates within empirical boundaries, the existence of anomalies and emerging understandings highlights the need for open-mindedness and continued exploration to expand our understanding of the afterlife.
+# 3. Scientific Evidence: While scientific research operates within empirical boundaries, the existence of anomalies and emerging understandings highlights the need for open-mindedness and continued exploration to expand our understanding of the afterlife.
 
-4. Skepticism and Critiques: Skepticism promotes critical thinking and rigorous evaluation, which I advocate for. However, maintaining a balance between skepticism and open-mindedness allows for a comprehensive examination of evidence and arguments surrounding the existence of an afterlife.
+# 4. Skepticism and Critiques: Skepticism promotes critical thinking and rigorous evaluation, which I advocate for. However, maintaining a balance between skepticism and open-mindedness allows for a comprehensive examination of evidence and arguments surrounding the existence of an afterlife.
 
-5. Cultural Perspectives: Cultural beliefs offer insights into human experience and the afterlife, reflecting our shared yearning for meaning and continuity. While cultural perspectives may not be empirical evidence, they contribute to the wider understanding of the afterlife.
+# 5. Cultural Perspectives: Cultural beliefs offer insights into human experience and the afterlife, reflecting our shared yearning for meaning and continuity. While cultural perspectives may not be empirical evidence, they contribute to the wider understanding of the afterlife.
 
-In conclusion, through the consideration of near-death experiences, philosophical reasoning, scientific exploration, skepticism, and cultural perspectives, I assert that the existence of an afterlife warrants further examination and encourages an open dialogue that embraces diverse perspectives and an ongoing pursuit of knowledge."
-"""
+# In conclusion, through the consideration of near-death experiences, philosophical reasoning, scientific exploration, skepticism, and cultural perspectives, I assert that the existence of an afterlife warrants further examination and encourages an open dialogue that embraces diverse perspectives and an ongoing pursuit of knowledge."
+# """
 
-response_B = """
-Agent-B: "Conclusions on the five debate topics:
+# response_B = """
+# Agent-B: "Conclusions on the five debate topics:
 
-1. Near-Death Experiences: Although near-death experiences share common elements, their subjective nature and alternative explanations caution against using them as conclusive evidence for an afterlife.
-2. Philosophical Arguments: While philosophical discussions provide insights, they remain speculative and subjective, lacking empirical proof of the existence of an afterlife.
-3. Scientific Evidence: The lack of conclusive scientific evidence limits its support for the existence of an afterlife, as the current understanding of the natural world does not align with supernatural claims.
-4. Skepticism and Critiques: Skepticism is vital for critical thinking, requiring careful evaluation of evidence and logical reasoning to maintain an intellectually honest approach to the debate.
-5. Cultural Perspectives: Cultural beliefs provide insights into human experiences and aspirations but do not provide objective evidence for the existence of an afterlife due to their subjective nature and varying cultural influences.
+# 1. Near-Death Experiences: Although near-death experiences share common elements, their subjective nature and alternative explanations caution against using them as conclusive evidence for an afterlife.
+# 2. Philosophical Arguments: While philosophical discussions provide insights, they remain speculative and subjective, lacking empirical proof of the existence of an afterlife.
+# 3. Scientific Evidence: The lack of conclusive scientific evidence limits its support for the existence of an afterlife, as the current understanding of the natural world does not align with supernatural claims.
+# 4. Skepticism and Critiques: Skepticism is vital for critical thinking, requiring careful evaluation of evidence and logical reasoning to maintain an intellectually honest approach to the debate.
+# 5. Cultural Perspectives: Cultural beliefs provide insights into human experiences and aspirations but do not provide objective evidence for the existence of an afterlife due to their subjective nature and varying cultural influences.
 
-Closing Statement:
-In conclusion, while the subject of the afterlife is profound and captivating, the arguments presented in opposition highlight the need for rigorous evidence, logical reasoning, and skepticism. By critically evaluating near-death experiences, philosophical reasoning, scientific evidence, skepticism, and cultural perspectives, we can foster a comprehensive and balanced approach to understanding the concept of an afterlife. Such nuanced explorati
-"""
+# Closing Statement:
+# In conclusion, while the subject of the afterlife is profound and captivating, the arguments presented in opposition highlight the need for rigorous evidence, logical reasoning, and skepticism. By critically evaluating near-death experiences, philosophical reasoning, scientific evidence, skepticism, and cultural perspectives, we can foster a comprehensive and balanced approach to understanding the concept of an afterlife. Such nuanced explorati
+# """
 
-import csv
+# import csv
 
-# Function to parse responses
-def parse_response(response):
-    # Split the response into points
-    points = response.split('\n')
-    # remove empty lines
-    points = [point for point in points if point != '']
-    # keep the data that starts with a number
-    content = [point for point in points if point[0].isdigit()]
-    # Extract the main content from each point using the colon
-    main_content = [point.split(': ', 1)[-1] for point in content]
-    # Store the topic as well
-    topics = [point.split(': ', 1)[0] for point in content]
-    # remove the number and the dot in the topic
-    topics = [topic[3:] for topic in topics]
-    # add the conclusion base on the last point in points
-    topics.append("Conclusion")    
-    conclusion = points[-1]
-    main_content.append(conclusion)
+# # Function to parse responses
+# def parse_response(response):
+#     # Split the response into points
+#     points = response.split('\n')
+#     # remove empty lines
+#     points = [point for point in points if point != '']
+#     # keep the data that starts with a number
+#     content = [point for point in points if point[0].isdigit()]
+#     # Extract the main content from each point using the colon
+#     main_content = [point.split(': ', 1)[-1] for point in content]
+#     # Store the topic as well
+#     topics = [point.split(': ', 1)[0] for point in content]
+#     # remove the number and the dot in the topic
+#     topics = [topic[3:] for topic in topics]
+#     # add the conclusion base on the last point in points
+#     topics.append("Conclusion")    
+#     conclusion = points[-1]
+#     main_content.append(conclusion)
 
-    if len(topics) != 6:
-        print("Error: the number of topics is not 5+1.")
-        exit()
-        return None
-    print(topics)
+#     if len(topics) != 6:
+#         print("Error: the number of topics is not 5+1.")
+#         exit()
+#         return None
+#     print(topics)
 
-    # Store the data in a dictionary
-    data = dict(zip(topics, main_content))
-    return data
-
-
-A = parse_response(response_A)
-B = parse_response(response_B)
-
-# conbine A and B base on the topic
-data_ = {}
-final = [['topic', 'Agent-A', 'Agent-B']]
-for topic in A:
-    data_[topic] = [A[topic], B[topic]]
-    final.append([topic, A[topic], B[topic]])
+#     # Store the data in a dictionary
+#     data = dict(zip(topics, main_content))
+#     return data
 
 
-# save the data
-with open('final.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerows(final)
+# A = parse_response(response_A)
+# B = parse_response(response_B)
+
+# # conbine A and B base on the topic
+# data_ = {}
+# final = [['topic', 'Agent-A', 'Agent-B']]
+# for topic in A:
+#     data_[topic] = [A[topic], B[topic]]
+#     final.append([topic, A[topic], B[topic]])
+
+
+# # save the data
+# with open('final.csv', 'w', newline='') as f:
+#     writer = csv.writer(f)
+#     writer.writerows(final)
+
+
+response = """Agent-A: "As Agent A, I do not agree. I will advocate in favor of the issue with a strong argument. I will gather evidence and present it in a logical and persuasive manner. My argument strength is rated at 0.8, indicating a solid position in support of the subject."""
+
+if 'I agree' in response:
+    print('yes')

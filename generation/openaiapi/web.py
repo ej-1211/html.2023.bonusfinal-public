@@ -9,6 +9,20 @@ import time
 import json
 import config
 
+js_script = """
+var originalSetTimeout = window.setTimeout;
+window.setTimeout = function(callback, delay) {
+    // Check if the callback is the displayNextLetter function or contains its code
+    if (callback.toString().indexOf('displayNextLetter') !== -1 || callback.toString().includes('temp.innerHTML')) {
+        delay = 1.5; // Set the new delay
+    }
+    return originalSetTimeout(callback, delay);
+};
+"""
+# Execute the script
+
+EXIT_DRIVER = False
+
 def get_response(last_response = None):
     # driver.clear_requests()
     response_ = None
@@ -51,6 +65,7 @@ def checkTemp():
     Check if the agent is responding, if so, wait until the agent finish responding
     '''
     # locate the "temp", which means that the agent is "responding", so the input area is disabled
+    WaitTime = 0
     while True:
         try:
             # Try to find the element
@@ -58,11 +73,15 @@ def checkTemp():
             # If the element is found, it means the agent is responding
             # print("Agent-A is responding...")
             time.sleep(0.5)
+            WaitTime += 0.5
         except NoSuchElementException:
             # If the element is not found, it means the agent has finished responding
             print("Agent finish responding...")
             break
-
+        
+        if WaitTime > 60:
+            print("Error: Agent is not responding...")
+            exit()
 def select_action(target):
     if target == "B":
         visible_text = "Agent-B"
@@ -102,6 +121,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
             response = get_response(last_response)
             response__ = json.loads(response)
             raw_response = response__['message']
+            # print(raw_response)
             # print("##########################################")
             # print("Last response: ")
             # print(last_response)
@@ -149,6 +169,7 @@ except:
     driver.quit()
 
 
+
 # Input the LLM config
 
 llmConfigBox = driver.find_element(By.ID,"llm_config")
@@ -162,6 +183,7 @@ time.sleep(1)
 InputArea = driver.find_element(By.ID,"userinput")
 
 
+driver.execute_script(js_script)
 ### [1] ###
 
     
@@ -260,31 +282,72 @@ checkTemp()
 
 ### [19] ###
 
-### [20] ###
+### [20] ### : A invite feedback from B
 select_action("A")
 Q20 = config.Q20 + combine_response(response_17,response_18)
 response_20 = Send_Question_and_Get_response(20,Q20,response_18)
 checkTemp()
 
-### [21] ###
+### [21] ### : B give feedback to A
 select_action("B")
 Q21_1 = config.Q21_request_B + combine_response(response_18,response_17)
 response_21_1 = Send_Question_and_Get_response(21,Q21_1,response_20)
 checkTemp()
 
-### [22] ###
+# check if B is agree or not
+if 'I do not agree' in json.loads(response_21_1)['message']:
+    # B do not agree -> give why B disagree and invite A to give feedback
+    select_action("A")
+    Q21_2 = config.Q21_disagree_A + '\n' + json.loads(response_21_1)['message']
+    response_21_2 = Send_Question_and_Get_response(21,Q21_2,response_21_1)
+    checkTemp()
 
-### [23] ###
-select_action("A")
-response_23 = Send_Question_and_Get_response(23,config.Q23,response_21_1)
-checkTemp()
+    # Tell B that A has given feedback
+    select_action("B")
+    Q21_3 = config.Q21_request_B_2 + '\n' + json.loads(response_21_2)['message']
+    response_21_3 = Send_Question_and_Get_response(21,Q21_3,response_21_2)
+    checkTemp()
 
-### [24] ###
-select_action("B")
-response_24 = Send_Question_and_Get_response(24,config.Q24,response_23)
-checkTemp()
+    # tell A final debate topic and invite A to give feedback
+    select_action("A")
+    Q21_4 = config.Q21_agree_A + '\n' + json.loads(response_21_3)['message']
+    response_21_4 = Send_Question_and_Get_response(21,Q21_4,response_21_3)
+    checkTemp()
 
-### [25] ###
+    # tell B final debate topic
+    select_action("B")
+    Q21_5 = config.Q21_agree_B + '\n' + json.loads(response_21_3)['message']
+    response_24 = Send_Question_and_Get_response(21,Q21_5,response_21_4)
+    checkTemp()
+else:
+    # B agree
+    # tell A final debate topic and tell A to make conscenr
+    select_action("A")
+    response_23 = Send_Question_and_Get_response(23,config.Q23,response_21_1)
+    checkTemp()
+
+    # tell B final debate topic and tell B to make conscenr
+    select_action("B")
+    response_24 = Send_Question_and_Get_response(24,config.Q24,response_23)
+    checkTemp()
+
+
+
+
+
+# ### [22] ###
+
+# ### [23] ###
+# select_action("A")
+# response_23 = Send_Question_and_Get_response(23,config.Q23,response_21_1)
+# checkTemp()
+
+# ### [24] ###
+# select_action("B")
+# response_24 = Send_Question_and_Get_response(24,config.Q24,response_23)
+# checkTemp()
+
+# ### [25] ###
 
 ### [26] ###
 select_action("A")
@@ -422,7 +485,10 @@ InputArea.send_keys(config.topic)
 InputArea_PlaceHolder_before = InputArea.get_attribute("placeholder")
 Sendbtn = driver.find_element(By.ID,"sendbtn")
 Sendbtn.click()
-print(f"Save the result...")
+print(f"Save the result...Done!")
+print("Exit the driver...")
+EXIT_DRIVER = True
+
 
 
 
@@ -430,13 +496,16 @@ print(f"Save the result...")
 
 
 
-
-
-
 try:
+    if EXIT_DRIVER:
+        driver.quit()
+        exit()
     while True:
         time.sleep(1)
         pass
 except KeyboardInterrupt:
     # 按下 Ctrl+C 時，退出循環並關閉 WebDriver
     driver.quit()
+    exit()
+
+exit()

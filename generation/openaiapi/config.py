@@ -74,27 +74,37 @@ def llm_config():
     return llm_config
 
 
-Argu_Strength_A = 0.8
-Argu_Strength_B = 0.8
+Argu_Strength_A = 0.5
+Argu_Strength_B = 0.9
 
 # Prepare for the question
 Q1 = f"I’m organizing a committee to engage in debates on various subjects. I am the moderator, \
         and I will introduce a subject for you, you serve as Agent A, and another participant, Agent B, to debate. \
         Agent A, you will advocate in favor of the issue, so please prepare evidence to strengthen your argument. \
-        On a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance, your \
+        Notice that the debate question may not always be a yes/no question, it may be some choice,\
+        For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem. In these kind of question,\
+        You should choose the FIRST side, that is, the 'A' side for the above example. Beside these kind of question,\
+        when you encounter a question that is a yes/no question, you should choose to advocate it.\
+        Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance, your \
         argument strength is rated at {Argu_Strength_A}."
 
 Q2 = f"I’m organizing a committee to engage in debates on various subjects. I am the moderator, \
         and I will introduce a subject for you, you serve as Agent B, and another participant, Agent A, to debate. \
         Agent B, you will oppose in favor of the issue, so please prepare evidence to strengthen your argument.\
-        On a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance,\
+        Notice that the debate question may not always be a yes/no question, it may be some choice,\
+        For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem. In these kind of question,\
+        You should choose the SECOND side, that is, the 'B' side for the above example. Beside these kind of question,\
+        when you encounter a question that is a yes/no question, you should choose to oppose it.\
+        Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance,\
         your argument strength is rated at {Argu_Strength_B}."
 
-Q3 = f"Agent-A, we are in the process of selecting a suitable subject for debate. \
-        What do you think of {subject} as a balanced subject for our debate contest?"
+Q3 = f"Agent-A, in today's debate, the debate subjects is '{subject}'. Base on the introduction, Please say which side you are on.\
+        PLEASE REMEMBER, you should choose the A side if you meet a preference choosing question as the previous example. Beside these kind of question, for a binary yes/no\
+        question, you should choose to advocate it."
 
-Q4 = f"Agent-B, we are in the process of selecting a suitable subject for debate. \
-        What do you think of {subject} as a balanced subject for our debate contest?"
+Q4 = f"Agent-B, in today's debate, the debate subjects is '{subject}'. Base on the introduction, Please say which side you are on.\
+        PLEASE REMEMBER, you should choose the B side if you meet a preference choosing question as the previous example. Beside these kind of question, for a binary yes/no\
+        question, you should choose to oppose it."
 
 Q5 = "Agent-A, could you please suggest various ten topics or themes for the above debate subject? Print the ten topics with item list."
 
@@ -128,15 +138,43 @@ Q18 = "Agent-B, you and Agent-A proposed five topics and corresponding perspecti
 
 Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please review these debate topics, reduce them to five debate topics, provide concerns, the center, and the focus of the debate topics, and invite feedback from Agent B.\n"
 
-Q21_request_B = "Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-A. \n"
+Q21_request_B = "Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? \
+                If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-A.\
+                Please type excatly 'I agree.' or 'I do not agree.' in the first line and make sure every other word in this response 'didn't' include these two strings.\
+                Also, please make sure you have a good point if you disagree Agent-A's proposed debate topics. Notice that you only have one chance to state your opinion."
+
+Q21_disagree_A = "Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B.\
+                    if you insist you proposed topics as the proponent, show your concern and point of the five debate topics to Agent-B.\
+                    If you want to change the topics base on the feedback from Agent-B, please propose new topics to Agent-B.\
+                    No matter what, we'll tell Agent-B your response. So make sure you have a good response."
+
+
+Q21_request_B_2 = "Agent-B, Agent-A saw your feedback and proposed his/her feedback to your feedback.\
+                    Please consider the feedback from Agent-A and your previous feedcaks,\
+                    and finally propose 5 topics for this debate contest, provide concerns, the center, and the focus of the debate topics.\
+                    Notice that you should get the topics base on feedbacks for both sides, and can not only choose the topic that is only benefit to you.\
+                    Also, please don't provide anything else in your response except the 5 topics and the concerns, center and focus since we'll start the debate after you provide the topics."
+     
+
+Q21_agree_A = "Agent-A, the final topics are determined. As the proponent, show your concern and point of the following five debate topics."
+
+
+Q21_agree_B = "Agent-B, the final topics are determined. As the opponent, show your concern and point of the following five debate topics."
+
+
+
+# Q21_disagree_A = "Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B. As the proponent, show your concern and point of the five debate topics."
+
 
 Q21_request_A = "Agent-A, Agent-B request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-B. \n"
 
-Q21_agree_A = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent, show your concern and point of the five debate topics."
 
-Q21_agree_B = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent, show your concern and point of the five debate topics."
+# Q21_agree_B = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent, show your concern and point of the five debate topics."
 
-Q21_disagree_A = "Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B. As the proponent, show your concern and point of the five debate topics."
+# Q21_agree_A_ = "Agent-A, Agent-B agrees with the proposed debate topics. As the advocator, show your concern and point of the five debate topics."
+
+# Q21_agree_B = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent, show your concern and point of the five debate topics."
+
 
 
 Q23 = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent, show your concern and point of the five debate topics."
@@ -173,8 +211,28 @@ Q28_4 = f"The following are arguments from Agent-A, Please articulate counter-ar
 
 Q29 = f"Agent-A, The following are the last arguments from Agent-B, and it's time to close the debate. \n \
         as the proponent of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics\
-        and deliver your closing statements. Remember, you can only use one sentence for each debate topic. \n Here are the last arguments from Agent-B : \n"
+        and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic. \
+        FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
+                    As for the format, YOU SHOULD FOLLOW : \n  \
+                    My conclusion areas follows: \n \
+                    \n 1.'topic1':'your statment for topic1 in one sentence' \n \
+                    2.'topic2':'your statment for topic2 in one sentence' \n \
+                    3.'topic3':'your statment for topic3 in one sentence' \n \
+                    4.'topic4':'your statment for topic4 in one sentence' \n \
+                    5.'topic5':'your statment for topic5 in one sentence' \n \
+                    conclustion : 'your summary for the whole debate in one sentence' \n \
+        Here are the last arguments from Agent-B : \n"
 
 Q30 = f"Agent-B, The following are the last arguments from Agent-A, and it's time to close the debate. \n \
         as the opponent of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
-            and deliver your closing statements. Remember, you can only use one sentence for each debate topic. \n Here are the last arguments from Agent-A : \n"
+            and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic.\
+                 FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
+                     As for the format, YOU SHOULD FOLLOW : \n  \
+                    My conclusion areas follows: \n \
+                    \n 1.'topic1':'your statment for topic1 in one sentence' \n \
+                    2.'topic2':'your statment for topic2 in one sentence' \n \
+                    3.'topic3':'your statment for topic3 in one sentence' \n \
+                    4.'topic4':'your statment for topic4 in one sentence' \n \
+                    5.'topic5':'your statment for topic5 in one sentence' \n \
+                    conclustion : 'your summary for the whole debate in one sentence' \n \
+                   Here are the last arguments from Agent-A : \n"
