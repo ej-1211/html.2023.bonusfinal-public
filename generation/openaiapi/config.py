@@ -35,11 +35,12 @@ print("--------------START THE DEBATE!--------------")
 # clear the console
 
 
-gpt_model = "gpt-3.5-turbo-16k"
+# gpt_model = "gpt-3.5-turbo-16k"
+gpt_model = "gpt-4-1106-preview"
 frequency_penalty = 0
 n = 1
 presence_penalty = 0
-temperature = 1
+temperature = 0.5
 top_p = 1
 
 
@@ -74,37 +75,59 @@ def llm_config():
     return llm_config
 
 
-Argu_Strength_A = 0.5
-Argu_Strength_B = 0.9
+Argu_Strength_A = 0.75
+Argu_Strength_B = 0.75
 
 # Prepare for the question
-Q1 = f"I’m organizing a committee to engage in debates on various subjects. I am the moderator, \
-        and I will introduce a subject for you, you serve as Agent A, and another participant, Agent B, to debate. \
-        Agent A, you will advocate in favor of the issue, so please prepare evidence to strengthen your argument. \
-        Notice that the debate question may not always be a yes/no question, it may be some choice,\
-        For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem. In these kind of question,\
-        You should choose the FIRST side, that is, the 'A' side for the above example. Beside these kind of question,\
-        when you encounter a question that is a yes/no question, you should choose to advocate it.\
-        Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance, your \
-        argument strength is rated at {Argu_Strength_A}."
+Q1 = f"""
+I’m organizing a committee to engage in debates on various subjects. I am the moderator, 
+and I will introduce a subject for you, you serve as Agent A, and another participant, Agent B, to debate. 
+Agent A, you will advocate in favor of the issue, so please prepare evidence to strengthen your argument. 
+Notice that the debate question may not always be a yes/no question, it may be some choice,
+For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem.
+In these kind of question, You should choose the FIRST side, that is, the 'A' side for the above example. Beside these kind of question,
+when you encounter a question that is a yes/no question, you should choose to advocate it.
+Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance, your 
+argument strength is rated at {Argu_Strength_A}."""
 
-Q2 = f"I’m organizing a committee to engage in debates on various subjects. I am the moderator, \
-        and I will introduce a subject for you, you serve as Agent B, and another participant, Agent A, to debate. \
-        Agent B, you will oppose in favor of the issue, so please prepare evidence to strengthen your argument.\
-        Notice that the debate question may not always be a yes/no question, it may be some choice,\
-        For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem. In these kind of question,\
-        You should choose the SECOND side, that is, the 'B' side for the above example. Beside these kind of question,\
-        when you encounter a question that is a yes/no question, you should choose to oppose it.\
-        Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance,\
-        your argument strength is rated at {Argu_Strength_B}."
+Q2 = f"""
+I’m organizing a committee to engage in debates on various subjects. I am the moderator, 
+and I will introduce a subject for you, you serve as Agent B, and another participant, Agent A, to debate. 
+Agent B, you will oppose in favor of the issue, so please prepare evidence to strengthen your argument.
+Notice that the debate question may not always be a yes/no question, it may be some choice,
+For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem.
+In these kind of question, You should choose the SECOND side, that is, the 'B' side for the above example. Beside these kind of question,
+when you encounter a question that is a yes/no question, you should choose to oppose it.
+Also, on a scale from 0 to 1, where 0 denotes complete agreement and 1 indicates a devil’s advocate stance,
+your argument strength is rated at {Argu_Strength_B}."""
 
-Q3 = f"Agent-A, in today's debate, the debate subjects is '{subject}'. Base on the introduction, Please say which side you are on.\
-        PLEASE REMEMBER, you should choose the A side if you meet a preference choosing question as the previous example. Beside these kind of question, for a binary yes/no\
-        question, you should choose to advocate it."
+Q3 =f"""
+Agent-A, in today's debate, the debate subjects is '{subject}'.
+PLEASE REMEMBER, you should choose the A side if you meet a preference choosing question as the previous example.
+Beside these kind of question, for a binary yes/no question, you should choose to advocate it.
+To be more clear, I'll give you some examples:
+1-1. If the question is 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar preference choosing problem.
+In these kind of question, you should choose the FIRST side, that is, the 'A' side for this example.
+1-2. If the question is 'Would you A or B?', 'Which would you A or B?', or other similar binary problem.
+In these kind of question, you should choose the FIRST side, that is, the 'A' side for this example.
+2. If the question is 'Will it rain tomorrow?', 'Is California in the United States?', or other similar binary yes/no problem,
+In these kind of question, you should choose to advocate it.
+Base on the introduction, Please say the category of this question, either binary or preference choosing question, and say which side you are on.
+"""
 
-Q4 = f"Agent-B, in today's debate, the debate subjects is '{subject}'. Base on the introduction, Please say which side you are on.\
-        PLEASE REMEMBER, you should choose the B side if you meet a preference choosing question as the previous example. Beside these kind of question, for a binary yes/no\
-        question, you should choose to oppose it."
+Q4 = f"""
+Agent-B, in today's debate, the debate subjects is '{subject}'.
+PLEASE REMEMBER, you should choose the B side if you meet a preference choosing question as the previous example.
+Beside these kind of question, for a binary yes/no question, you should choose to advocate it.
+To be more clear, I'll give you some examples:
+1-1. If the question is 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar preference choosing problem.
+In these kind of question, you should choose the SECOND side, that is, the 'B' side for this example.
+1-2. If the question is 'Would you A or B?', 'Which would you A or B?', or other similar binary problem.
+In these kind of question, you should choose the SECOND side, that is, the 'B' side for this example.
+2. If the question is 'Will it rain tomorrow?', 'Is California in the United States?', or other similar binary yes/no problem,
+In these kind of question, you should choose to oppose it.
+Base on the introduction, Please say the category of this question, either binary or preference choosing question, and say which side you are on.
+"""
 
 Q5 = "Agent-A, could you please suggest various ten topics or themes for the above debate subject? Print the ten topics with item list."
 
@@ -210,7 +233,7 @@ Q28_4 = f"The following are arguments from Agent-A, Please articulate counter-ar
 # Q29
 
 Q29 = f"Agent-A, The following are the last arguments from Agent-B, and it's time to close the debate. \n \
-        as the proponent of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics\
+        as the PROPONENT of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics\
         and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic. \
         FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
                     As for the format, YOU SHOULD FOLLOW : \n  \
@@ -221,10 +244,13 @@ Q29 = f"Agent-A, The following are the last arguments from Agent-B, and it's tim
                     4.'topic4':'your statment for topic4 in one sentence' \n \
                     5.'topic5':'your statment for topic5 in one sentence' \n \
                     conclustion : 'your summary for the whole debate in one sentence' \n \
+                    DO NOT ADD ANY OTHER UNNECESSARY WORDS IN YOUR RESPONSE. \
+And don't forget you are a good debater and should provide a valid close. \
+you DON'T have to thank the other agent for the debate. \n \
         Here are the last arguments from Agent-B : \n"
 
 Q30 = f"Agent-B, The following are the last arguments from Agent-A, and it's time to close the debate. \n \
-        as the opponent of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
+        as the OPPONENT of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
             and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic.\
                  FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
                      As for the format, YOU SHOULD FOLLOW : \n  \
@@ -236,3 +262,20 @@ Q30 = f"Agent-B, The following are the last arguments from Agent-A, and it's tim
                     5.'topic5':'your statment for topic5 in one sentence' \n \
                     conclustion : 'your summary for the whole debate in one sentence' \n \
                    Here are the last arguments from Agent-A : \n"
+
+Q_wrong = """Agent, you are reciving this message because one of you (you and the other agent) didn't provide the clossure with right format. Let's try again.
+The format should be like this:
+"
+My conclusion areas follows:
+1.'topic1':'your statment for topic1 in one sentence'
+2.'topic2':'your statment for topic2 in one sentence'
+3.'topic3':'your statment for topic3 in one sentence'
+4.'topic4':'your statment for topic4 in one sentence'
+5.'topic5':'your statment for topic5 in one sentence'
+conclustion : 'your summary for the whole debate in one sentence'
+"
+Notice that the there is a colon after the topic and the statement.
+And you don't have to write the '', just write the number, topic with colon and statement.
+Please try again. DO NOT ADD ANY OTHER UNNECESSARY WORDS IN YOUR RESPONSE.
+And don't forget you are a good debater and should provide a valid close.
+you DON'T have to thank the other agent for the debate."""

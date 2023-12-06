@@ -6,8 +6,11 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
 import time
+import datetime as datetime
 import json
 import config
+import pandas as pd
+import os
 
 js_script = """
 var originalSetTimeout = window.setTimeout;
@@ -22,6 +25,11 @@ window.setTimeout = function(callback, delay) {
 # Execute the script
 
 EXIT_DRIVER = False
+# get the current time
+now = datetime.datetime.now().strftime("%m%d_%H%M")
+# create a folder to store the result of the debate, the folder name is the current time
+os.mkdir(f'generation/openaiapi/result/{now}')
+file_path = f'generation/openaiapi/result/{now}'
 
 def get_response(last_response = None):
     # driver.clear_requests()
@@ -103,7 +111,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     4. Return the response
     '''
     # log the question to the log file
-    with open(f'generation/openaiapi/result/{config.topic}.log', 'a') as f:
+    with open(f'generation/openaiapi/result/{now}/{config.topic}.log', 'a') as f:
         f.write('\n')
         f.write(f"[{stage}] Moderator: \n")
         f.write(f'{Question}\n')
@@ -133,7 +141,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
             # split the raw_response by "\n" and log it to another file
             response_ = raw_response.split('\n')
             print(f"Q{stage}/30 is answered by Agent")
-            with open(f'generation/openaiapi/result/{config.topic}.log', 'a') as f:
+            with open(f'generation/openaiapi/result/{now}/{config.topic}.log', 'a') as f:
                 f.write(f"[{stage}]: \n")
                 for line in response_:
                     f.write(f'{line}\n')
@@ -457,9 +465,11 @@ try :
     final_A = parse_response(json.loads(response_29)['message'])
     final_B = parse_response(json.loads(response_30)['message'])
 
+
     # conbine A and B base on the topic
     data_ = {}
     final = [['topic', 'Agent-A', 'Agent-B']]
+
     for topic in final_A:
         data_[topic] = [final_A[topic], final_B[topic]]
         final.append([topic, final_A[topic], final_B[topic]])
@@ -467,16 +477,53 @@ try :
     if len(final) != 6:
         print("Error: the number of topics is not 5+1.")
         SyntaxError
+    # read the dictionary to pandas
 
     # save the data
-    with open(f'generation/openaiapi/result/{config.topic}.csv', 'w', newline='') as f:
+    with open(f'generation/openaiapi/result/{now}/{config.topic}.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(final)
 except:
-    print("################################")
-    print("Error when parsing the response...")
-    print(f"You can find the response in {config.topic}.log")
-    print("################################")
+
+    select_action("A")
+    response_close_A = Send_Question_and_Get_response("close",config.Q_wrong ,response_30)
+    checkTemp()
+
+    select_action("B")
+    response_close_B = Send_Question_and_Get_response("close",config.Q_wrong ,response_close_A)
+    checkTemp()
+
+    try :
+        final_A = parse_response(json.loads(response_close_A)['message'])
+        final_B = parse_response(json.loads(response_close_B)['message'])
+
+    # conbine A and B base on the topic
+        data_ = {}
+        final = [['topic', 'Agent-A', 'Agent-B']]
+        df_A = pd.DataFrame.from_dict(final_A, orient='index')
+        # reset the index
+        df_A.reset_index(inplace=True)
+        # rename the columns
+        df_A.columns = ['topic', 'Agent-A']
+        print(df_A)
+
+        df_B = pd.DataFrame.from_dict(final_B, orient='index')
+        df_B.reset_index(inplace=True)
+        df_B.columns = ['topic_B', 'Agent-B']
+
+        # merge the two dataframes base on the index row
+        df = pd.concat([df_A, df_B], axis=1)
+        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_raw.csv', index=False)
+        # drop the topic_B column
+        df.drop(['topic_B'], axis=1, inplace=True)
+        # save to csv
+        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}.csv', index=False)
+    except:
+
+        print("################################")
+        print("Error when parsing the response...in second try")
+        print(f"You can find the response in {config.topic}.log")
+        print("################################")
 
 
 # Export the result

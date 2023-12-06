@@ -11,3 +11,5 @@ __pyache__
 generation/openaiapi/result/*.csv
 generation/openaiapi/result/*.log
 generation/openaiapi/__pyache__
+
+generation/openaiapi/result/*
