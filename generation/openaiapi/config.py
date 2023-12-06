@@ -1,6 +1,7 @@
 # Config File
 import json
 import csv
+import os
 
 # read the subject and topic from another file called subjects-public.csv and store them in a dictionary
 subjects_topics = {}
@@ -20,11 +21,12 @@ with open('subjects-public.csv', newline='') as csvfile:
     # add the key as the count and the value as the subject
 
 # Prompt the user to select a subject
-print("Please select a subject from the following list:")
-for key in subjects_topics:
-    print(key, subjects_topics[key]['subject'])
-subject_num = input("Subject Number: ")
+# print("Please select a subject from the following list:")
+# for key in subjects_topics:
+#     print(key, subjects_topics[key]['subject'])
+# subject_num = input("Subject Number: ")
 
+subject_num = os.getenv('SUBJECT_NUM', 'default_value')
 
 subject = subjects_topics[subject_num]['subject']
 topic = subjects_topics[subject_num]['topic']
@@ -37,11 +39,14 @@ print("--------------START THE DEBATE!--------------")
 
 # gpt_model = "gpt-3.5-turbo-16k"
 gpt_model = "gpt-4-1106-preview"
-frequency_penalty = 0
+frequency_penalty = 0.1
 n = 1
-presence_penalty = 0
-temperature = 0.5
+presence_penalty = 0.1
+temperature = 1
 top_p = 1
+
+Argu_Strength_A = 0.9
+Argu_Strength_B = 0.9
 
 
 def llm_config():
@@ -75,8 +80,7 @@ def llm_config():
     return llm_config
 
 
-Argu_Strength_A = 0.75
-Argu_Strength_B = 0.75
+
 
 # Prepare for the question
 Q1 = f"""
@@ -159,24 +163,30 @@ Q18 = "Agent-B, you and Agent-A proposed five topics and corresponding perspecti
 
 # Q19 : save
 
-Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please review these debate topics, reduce them to five debate topics, provide concerns, the center, and the focus of the debate topics, and invite feedback from Agent B.\n"
+Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please review these debate topics, reduce them to five debate topics, provide concerns, the center, and the focus of the debate topics, and invite feedback from Agent B."
 
-Q21_request_B = "Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? \
-                If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-A.\
-                Please type excatly 'I agree.' or 'I do not agree.' in the first line and make sure every other word in this response 'didn't' include these two strings.\
-                Also, please make sure you have a good point if you disagree Agent-A's proposed debate topics. Notice that you only have one chance to state your opinion."
+Q21_request_B = """
+Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? 
+If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-A.
+Please type excatly 'I agree.' or 'I do not agree.' in the first line and make sure every other word in this response 'didn't' include these two strings.
+Also, please make sure you have a good point if you disagree Agent-A's proposed debate topics. Notice that you only have one chance to state your opinion.
+"""
 
-Q21_disagree_A = "Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B.\
-                    if you insist you proposed topics as the proponent, show your concern and point of the five debate topics to Agent-B.\
-                    If you want to change the topics base on the feedback from Agent-B, please propose new topics to Agent-B.\
-                    No matter what, we'll tell Agent-B your response. So make sure you have a good response."
+Q21_disagree_A = """
+Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B.
+if you insist you proposed topics as the proponent, show your concern and point of the five debate topics to Agent-B.
+If you want to change the topics base on the feedback from Agent-B, please propose new topics to Agent-B.
+No matter what, we'll tell Agent-B your response. So make sure you have a good response.
+"""
 
 
-Q21_request_B_2 = "Agent-B, Agent-A saw your feedback and proposed his/her feedback to your feedback.\
-                    Please consider the feedback from Agent-A and your previous feedcaks,\
-                    and finally propose 5 topics for this debate contest, provide concerns, the center, and the focus of the debate topics.\
-                    Notice that you should get the topics base on feedbacks for both sides, and can not only choose the topic that is only benefit to you.\
-                    Also, please don't provide anything else in your response except the 5 topics and the concerns, center and focus since we'll start the debate after you provide the topics."
+Q21_request_B_2 = """
+Agent-B, Agent-A saw your feedback and proposed his/her feedback to your feedback.
+Please consider the feedback from Agent-A and your previous feedcaks,
+and finally propose 5 topics for this debate contest, provide concerns, the center, and the focus of the debate topics.
+Notice that you should get the topics base on feedbacks for both sides, and can not only choose the topic that is only benefit to you.
+Also, please don't provide anything else in your response except the 5 topics and the concerns, center and focus since we'll start the debate after you provide the topics.
+"""
      
 
 Q21_agree_A = "Agent-A, the final topics are determined. As the proponent, show your concern and point of the following five debate topics."
@@ -232,36 +242,40 @@ Q28_4 = f"The following are arguments from Agent-A, Please articulate counter-ar
 
 # Q29
 
-Q29 = f"Agent-A, The following are the last arguments from Agent-B, and it's time to close the debate. \n \
-        as the PROPONENT of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics\
-        and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic. \
-        FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
-                    As for the format, YOU SHOULD FOLLOW : \n  \
-                    My conclusion areas follows: \n \
-                    \n 1.'topic1':'your statment for topic1 in one sentence' \n \
-                    2.'topic2':'your statment for topic2 in one sentence' \n \
-                    3.'topic3':'your statment for topic3 in one sentence' \n \
-                    4.'topic4':'your statment for topic4 in one sentence' \n \
-                    5.'topic5':'your statment for topic5 in one sentence' \n \
-                    conclustion : 'your summary for the whole debate in one sentence' \n \
-                    DO NOT ADD ANY OTHER UNNECESSARY WORDS IN YOUR RESPONSE. \
-And don't forget you are a good debater and should provide a valid close. \
-you DON'T have to thank the other agent for the debate. \n \
-        Here are the last arguments from Agent-B : \n"
+Q29 = f"""
+Agent-A, The following are the last arguments from Agent-B, and it's time to close the debate.
+as the PROPONENT of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics
+and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic. 
+FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!
+As for the format, YOU SHOULD FOLLOW : 
+My conclusion areas follows:
+1.'topic1':'your statment for topic1 in one sentence'
+2.'topic2':'your statment for topic2 in one sentence'
+3.'topic3':'your statment for topic3 in one sentence'
+4.'topic4':'your statment for topic4 in one sentence'
+5.'topic5':'your statment for topic5 in one sentence'
+conclustion : 'your summary for the whole debate in one sentence'
+DO NOT ADD ANY OTHER UNNECESSARY WORDS IN YOUR RESPONSE. 
+And don't forget you are a good debater and should provide a valid close. 
+you DON'T have to thank the other agent for the debate.
+Here are the last arguments from Agent-B : \n
+"""
 
-Q30 = f"Agent-B, The following are the last arguments from Agent-A, and it's time to close the debate. \n \
-        as the OPPONENT of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
-            and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic.\
-                 FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
-                     As for the format, YOU SHOULD FOLLOW : \n  \
-                    My conclusion areas follows: \n \
-                    \n 1.'topic1':'your statment for topic1 in one sentence' \n \
-                    2.'topic2':'your statment for topic2 in one sentence' \n \
-                    3.'topic3':'your statment for topic3 in one sentence' \n \
-                    4.'topic4':'your statment for topic4 in one sentence' \n \
-                    5.'topic5':'your statment for topic5 in one sentence' \n \
-                    conclustion : 'your summary for the whole debate in one sentence' \n \
-                   Here are the last arguments from Agent-A : \n"
+Q30 = f"""
+Agent-B, The following are the last arguments from Agent-A, and it's time to close the debate. 
+as the OPPONENT of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
+and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic.\
+FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
+As for the format, YOU SHOULD FOLLOW : 
+My conclusion areas follows: 
+1.'topic1':'your statment for topic1 in one sentence' 
+2.'topic2':'your statment for topic2 in one sentence' 
+3.'topic3':'your statment for topic3 in one sentence' 
+4.'topic4':'your statment for topic4 in one sentence' 
+5.'topic5':'your statment for topic5 in one sentence' 
+conclustion : 'your summary for the whole debate in one sentence' 
+Here are the last arguments from Agent-A : \n
+"""
 
 Q_wrong = """Agent, you are reciving this message because one of you (you and the other agent) didn't provide the clossure with right format. Let's try again.
 The format should be like this:

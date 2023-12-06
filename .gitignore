@@ -3,7 +3,6 @@ socrasynthLite
 __pyache__
 
 
-
 .DS_Store
 
 .log
@@ -11,5 +10,7 @@ __pyache__
 generation/openaiapi/result/*.csv
 generation/openaiapi/result/*.log
 generation/openaiapi/__pyache__
+generation/openaiapi/.DS_Store
+generation/openaiapi/__pycache__
 
 generation/openaiapi/result/*

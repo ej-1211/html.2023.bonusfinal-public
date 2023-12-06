@@ -31,6 +31,26 @@ now = datetime.datetime.now().strftime("%m%d_%H%M")
 os.mkdir(f'generation/openaiapi/result/{now}')
 file_path = f'generation/openaiapi/result/{now}'
 
+llm_config = config.llm_config()
+argu_A = config.Argu_Strength_A
+argu_B = config.Argu_Strength_B
+topic = config.topic
+subject = config.subject
+temperture = config.temperature
+
+
+# write to the log file
+with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.log', 'w') as f:
+    f.write(f"Topic: {topic}\n")
+    f.write(f"Subject: {subject}\n")
+    f.write(f"Agent-A: {argu_A}\n")
+    f.write(f"Agent-B: {argu_B}\n")
+    f.write(f"LLM config: {llm_config}\n")
+    f.write('###################################################################')
+    f.write('\n')
+
+
+
 def get_response(last_response = None):
     # driver.clear_requests()
     response_ = None
@@ -111,7 +131,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     4. Return the response
     '''
     # log the question to the log file
-    with open(f'generation/openaiapi/result/{now}/{config.topic}.log', 'a') as f:
+    with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.log', 'a') as f:
         f.write('\n')
         f.write(f"[{stage}] Moderator: \n")
         f.write(f'{Question}\n')
@@ -141,7 +161,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
             # split the raw_response by "\n" and log it to another file
             response_ = raw_response.split('\n')
             print(f"Q{stage}/30 is answered by Agent")
-            with open(f'generation/openaiapi/result/{now}/{config.topic}.log', 'a') as f:
+            with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.log', 'a') as f:
                 f.write(f"[{stage}]: \n")
                 for line in response_:
                     f.write(f'{line}\n')
@@ -152,6 +172,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     return response
 
 options = Options()
+options.add_argument("--headless")
 # options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 # Add any options if necessary
 driver_path = '/usr/local/bin/chromedriver'
@@ -480,7 +501,7 @@ try :
     # read the dictionary to pandas
 
     # save the data
-    with open(f'generation/openaiapi/result/{now}/{config.topic}.csv', 'w', newline='') as f:
+    with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(final)
 except:
@@ -513,11 +534,11 @@ except:
 
         # merge the two dataframes base on the index row
         df = pd.concat([df_A, df_B], axis=1)
-        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_raw.csv', index=False)
+        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}_raw.csv', index=False)
         # drop the topic_B column
         df.drop(['topic_B'], axis=1, inplace=True)
         # save to csv
-        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}.csv', index=False)
+        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.csv', index=False)
     except:
 
         print("################################")
