@@ -13,4 +13,4 @@ generation/openaiapi/__pyache__
 generation/openaiapi/.DS_Store
 generation/openaiapi/__pycache__
 
-generation/openaiapi/result/*
+# generation/openaiapi/result/*

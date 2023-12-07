@@ -9,7 +9,7 @@ with open('subjects-public.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     count = 1
     for row in reader:
-        print(count,row['name'], row['subject'])
+        # print(count,row['name'], row['subject'])
         count += 1
         # add the key as the count and the value as the subject
         subjects_topics[str(count)] = {
@@ -26,7 +26,7 @@ with open('subjects-public.csv', newline='') as csvfile:
 #     print(key, subjects_topics[key]['subject'])
 # subject_num = input("Subject Number: ")
 
-subject_num = os.getenv('SUBJECT_NUM', 'default_value')
+subject_num = os.getenv('SUBJECT_NUM', '6')
 
 subject = subjects_topics[subject_num]['subject']
 topic = subjects_topics[subject_num]['topic']
@@ -37,8 +37,8 @@ print("--------------START THE DEBATE!--------------")
 # clear the console
 
 
-# gpt_model = "gpt-3.5-turbo-16k"
-gpt_model = "gpt-4-1106-preview"
+gpt_model = "gpt-3.5-turbo-16k"
+# gpt_model = "gpt-4-1106-preview"
 frequency_penalty = 0.1
 n = 1
 presence_penalty = 0.1

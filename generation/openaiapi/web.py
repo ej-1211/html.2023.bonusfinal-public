@@ -4,6 +4,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import time
 import datetime as datetime
@@ -17,30 +19,32 @@ var originalSetTimeout = window.setTimeout;
 window.setTimeout = function(callback, delay) {
     // Check if the callback is the displayNextLetter function or contains its code
     if (callback.toString().indexOf('displayNextLetter') !== -1 || callback.toString().includes('temp.innerHTML')) {
-        delay = 1.5; // Set the new delay
+        delay = 2; // Set the new delay
     }
     return originalSetTimeout(callback, delay);
 };
 """
 # Execute the script
-
+MAX_WAIT_TIME = 150
 EXIT_DRIVER = False
 # get the current time
 now = datetime.datetime.now().strftime("%m%d_%H%M")
 # create a folder to store the result of the debate, the folder name is the current time
-os.mkdir(f'generation/openaiapi/result/{now}')
+# os.mkdir(f'generation/openaiapi/result/{now}')
 file_path = f'generation/openaiapi/result/{now}'
 
 llm_config = config.llm_config()
 argu_A = config.Argu_Strength_A
 argu_B = config.Argu_Strength_B
 topic = config.topic
+subject_num = config.subject_num
 subject = config.subject
 temperture = config.temperature
 
 
 # write to the log file
 with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.log', 'w') as f:
+    f.write(f"Start Time : {now}")
     f.write(f"Topic: {topic}\n")
     f.write(f"Subject: {subject}\n")
     f.write(f"Agent-A: {argu_A}\n")
@@ -51,43 +55,86 @@ with open(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1
 
 
 
+# def get_response(last_response = None):
+#     # driver.clear_requests()
+#     response_ = None
+#     # make sure the response is ready
+#     status = True
+#     # print("###########################")
+#     # print(last_response)
+#     # print("###########################")
+
+#     while status:
+        
+#         for request in reversed(driver.requests):
+#             if request.url == "http://140.112.90.203:6365/data":
+#                 # check if there is a response for the last request
+#                 if request.response:
+#                     # check if the response is the same as the last response
+#                     # if so, continue to wait
+#                     if request.response.body != last_response: 
+#                         status = False
+#                         time.sleep(1)
+#                         break
+#                 else:
+#                     # print("No response in the last request yet... breaking")
+#                     break
+        
+#     # extract the response
+#     for request in reversed(driver.requests):
+#         if request.url == "http://140.112.90.203:6365/data":
+#             response_ = request.response.body
+#             break
+
+#     if response_ == None:
+#         print("No response, something wrong in get_response()...")
+#         exit()
+
+    
+#     return response_
+    
 def get_response(last_response = None):
-    # driver.clear_requests()
     response_ = None
-    # make sure the response is ready
     status = True
-    # print("###########################")
-    # print(last_response)
-    # print("###########################")
 
     while status:
-        time.sleep(1)
         for request in reversed(driver.requests):
             if request.url == "http://140.112.90.203:6365/data":
-                # check if there is a response for the last request
-                if request.response:
-                    # check if the response is the same as the last response
-                    # if so, continue to wait
-
-                    if request.response.body != last_response: 
-                        status = False
-                        break
-                else:
-                    # print("No response in the last request yet... breaking")
+                # Check if there is a response and it's not the same as the last response
+                if request.response and request.response.body != last_response:
+                    status = False
+                    time.sleep(1)
                     break
-    # extract the response
+        
+    # Extract the response
     for request in reversed(driver.requests):
         if request.url == "http://140.112.90.203:6365/data":
-            response_ = request.response.body
-            break
+            if request.response:
+                response_ = request.response.body
+                break
 
-    if response_ == None:
+    if response_ is None:
         print("No response, something wrong in get_response()...")
         exit()
 
-    
     return response_
-    
+
+# def get_response(last_response=None):
+#     response_ = None
+#     while True:
+#         for request in reversed(driver.requests):
+#             if request.url == "http://140.112.90.203:6365/data":
+#                 if request.response:
+#                     # Check if the response is different from the last response
+#                     if request.response.body != last_response: 
+#                         response_ = request.response.body
+#                         return response_
+#                 break  # Break if no response or if it's the last response
+#         time.sleep(1)  # Wait a bit before checking again
+
+#     return response_
+
+
 def checkTemp():
     '''
     Check if the agent is responding, if so, wait until the agent finish responding
@@ -105,11 +152,17 @@ def checkTemp():
         except NoSuchElementException:
             # If the element is not found, it means the agent has finished responding
             print("Agent finish responding...")
+            time.sleep(0.5)
             break
         
-        if WaitTime > 60:
-            print("Error: Agent is not responding...")
-            exit()
+        if WaitTime > MAX_WAIT_TIME:
+            print("[No Temp Error]: Agent is not responding...")
+            print("Exit this driver")
+            current_time = datetime.datetime.now().strftime("%m%d_%H-%M-%S")
+            with open(f'generation/openaiapi/result/error.log', 'a') as f:
+                f.write(f"[{subject_num}] error : the agent is not responding, {current_time}\n")
+            driver.quit()
+            exit() 
 def select_action(target):
     if target == "B":
         visible_text = "Agent-B"
@@ -117,6 +170,7 @@ def select_action(target):
         visible_text = "Agent-A"
     elif target == "SAVE":
         visible_text = "Export"
+    time.sleep(1)
     select_element = driver.find_element(By.ID,"action")
     select = Select(select_element)
     select.select_by_visible_text(visible_text)
@@ -137,14 +191,57 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
         f.write(f'{Question}\n')
         f.write('\n')
 
-    InputArea.send_keys(Question)
-    InputArea_PlaceHolder_before = InputArea.get_attribute("placeholder")
+    def element_to_be_enabled(driver):
+        element = driver.find_element(By.ID, "userinput")
+        return element if element.is_enabled() else False
+
+    # Wait for the input area to be clickable
+
+    wait = WebDriverWait(driver, MAX_WAIT_TIME)
+    try :
+        wait = WebDriverWait(driver, MAX_WAIT_TIME)
+        input_area = wait.until(element_to_be_enabled)
+        # input_area = wait.until(EC.element_to_be_clickable((By.ID,"userinput")))
+        Input_area = driver.find_element(By.ID,"userinput")
+    except Exception as e:
+
+        print("Error: Can't locate the input area...")
+        print("Exit this driver")
+        current_time = datetime.datetime.now().strftime("%m%d_%H-%M-%S")
+        with open(f'generation/openaiapi/result/error.log', 'a') as f:
+            f.write(f"[{subject_num}] error : on stage {stage}, the wait is too long, can't locate input area {current_time}\n")
+            f.write(f"Exception occurred: {e}")
+
+        screenshot_filename = f"generation/openaiapi/result/error/screenshot_{stage}_{current_time}.png"
+        driver.get_screenshot_as_file(screenshot_filename)
+        print(f"Screenshot saved as {screenshot_filename}")
+
+        page_source_filename = f"generation/openaiapi/result/error/page_source_{stage}_{current_time}.html"
+        with open(page_source_filename, 'w') as file:
+            file.write(driver.page_source)
+        print(f"Page source saved as {page_source_filename}")
+
+
+
+        driver.quit()
+        exit()
+
+
+    # Send keys to the input area
+    # input_area.send_keys(Question)
+    Input_area.send_keys(Question)
+
+    # InputArea.send_keys(Question)
+    InputArea_PlaceHolder_before = input_area.get_attribute("placeholder")
+    # InputArea_PlaceHolder_before = InputArea.get_attribute("placeholder")
     Sendbtn = driver.find_element(By.ID,"sendbtn")
     Sendbtn.click()
     print(f"Q{stage}/30 is sent to Agent")
 
+    wait_time = 0
+
     while True:
-        time.sleep(0.5)
+        
         if InputArea.get_attribute("placeholder") != InputArea_PlaceHolder_before:
             response = get_response(last_response)
             response__ = json.loads(response)
@@ -167,6 +264,16 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
                     f.write(f'{line}\n')
                 f.write('\n')
             break
+        time.sleep(0.5)
+        wait_time += 0.5
+        if wait_time > MAX_WAIT_TIME:
+            print("Error: Agent is not responding...")
+            print("Exit this driver")
+            current_time = datetime.datetime.now().strftime("%m%d_%H-%M-%S")
+            with open(f'generation/openaiapi/result/error.log', 'a') as f:
+                f.write(f"[{subject_num}] error : on stage {stage}, the agent is not responding, {current_time}\n")
+            driver.quit()
+            exit()
     
     # return raw_response_no_n
     return response
@@ -534,11 +641,11 @@ except:
 
         # merge the two dataframes base on the index row
         df = pd.concat([df_A, df_B], axis=1)
-        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}_raw.csv', index=False)
+        df.to_csv(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}_raw.csv', index=False)
         # drop the topic_B column
         df.drop(['topic_B'], axis=1, inplace=True)
         # save to csv
-        df.to_csv(f'generation/openaiapi/result/{now}/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.csv', index=False)
+        df.to_csv(f'generation/openaiapi/result/{config.topic}_A{argu_A:.1f}_B{argu_B:.1f}_T{temperture:.1f}.csv', index=False)
     except:
 
         print("################################")
@@ -548,12 +655,20 @@ except:
 
 
 # Export the result
-select_action("SAVE")
-InputArea.send_keys(config.topic)
-InputArea_PlaceHolder_before = InputArea.get_attribute("placeholder")
-Sendbtn = driver.find_element(By.ID,"sendbtn")
-Sendbtn.click()
-print(f"Save the result...Done!")
+# select_action("SAVE")
+# time.sleep(1)
+# InputArea = driver.find_element(By.ID,"userinput")
+# InputArea.send_keys(config.topic)
+# InputArea_PlaceHolder_before = InputArea.get_attribute("placeholder")
+# Sendbtn = driver.find_element(By.ID,"sendbtn")
+# Sendbtn.click()
+# print(f"Save the result...Done!")
+
+# log the success message to the log file
+with open("generation/openaiapi/result/success.log", 'a') as f:
+    current_time = datetime.datetime.now().strftime("%m%d_%H-%M-%S")
+    f.write(f"[{subject_num}]{config.topic} success : {current_time}\n")
+
 print("Exit the driver...")
 EXIT_DRIVER = True
 
