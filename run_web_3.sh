@@ -1,7 +1,7 @@
 #!/bin/bash
-
+# Put the subject num here
 # Loop from 1 to 20
-for i in {21..30}
+for i in 19 20 21
 do
    echo "Running web.py with subject_num = $i"
    export SUBJECT_NUM=$i
