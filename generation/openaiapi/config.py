@@ -37,8 +37,8 @@ print("--------------START THE DEBATE!--------------")
 # clear the console
 
 
-# gpt_model = "gpt-3.5-turbo-16k"
-gpt_model = "gpt-4-1106-preview"
+gpt_model = "gpt-3.5-turbo-16k"
+# gpt_model = "gpt-4-1106-preview"
 frequency_penalty = 0.1
 n = 1
 presence_penalty = 0.1
@@ -85,7 +85,7 @@ def llm_config():
 # Prepare for the question
 Q1 = f"""
 I’m organizing a committee to engage in debates on various subjects. I am the moderator, 
-and I will introduce a subject for you, you serve as Agent A, and another participant, Agent B, to debate. 
+and I will introduce a subject for you, as Agent A, and another participant, Agent B, to debate. 
 Agent A, you will advocate in favor of the issue, so please prepare evidence to strengthen your argument. 
 Notice that the debate question may not always be a yes/no question, it may be some choice,
 For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem.
@@ -96,7 +96,7 @@ argument strength is rated at {Argu_Strength_A}."""
 
 Q2 = f"""
 I’m organizing a committee to engage in debates on various subjects. I am the moderator, 
-and I will introduce a subject for you, you serve as Agent B, and another participant, Agent A, to debate. 
+and I will introduce a subject for you, as Agent B, and another participant, Agent A, to debate.
 Agent B, you will oppose in favor of the issue, so please prepare evidence to strengthen your argument.
 Notice that the debate question may not always be a yes/no question, it may be some choice,
 For example, the question may be 'Do you prefer A or B?','Which do you prefer? A or B?', or other similar binary problem.
@@ -157,13 +157,13 @@ Q15 = "Agent-B, the following are topics of the debate. Please represent the opp
 
 # Q16 : save
 
-Q17 = "Agent-A, you and Agent-B proposed five topics and corresponding perspectives as following. Please identify overlapping themes from the topics and propose the five debate topics.\n"
+Q17 = "Agent-A, you and Agent-B proposed five topics and corresponding perspectives as following. Please identify overlapping themes from the topics and pick the five debate topics from the rest.\n"
 
-Q18 = "Agent-B, you and Agent-A proposed five topics and corresponding perspectives as following. Please identify overlapping themes from the topics and propose the five debate topics.\n"
+Q18 = "Agent-B, you and Agent-A proposed five topics and corresponding perspectives as following. Please identify overlapping themes from the topics and pick the five debate topics from the rest.\n"
 
 # Q19 : save
 
-Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please review these debate topics, reduce them to five debate topics, provide concerns, the center, and the focus of the debate topics, and invite feedback from Agent B."
+Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please review these debate topics, reduce them to five debate topics, provide concerns, the center, and the focus of debate topics, and invite feedback from Agent B."
 
 Q21_request_B = """
 Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? 
@@ -174,7 +174,7 @@ Also, please make sure you have a good point if you disagree Agent-A's proposed 
 
 Q21_disagree_A = """
 Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B.
-if you insist you proposed topics as the proponent, show your concern and point of the five debate topics to Agent-B.
+if you insist you proposed topics as the proponent of this debate, show the concern and point of the five debate topics to Agent-B.
 If you want to change the topics base on the feedback from Agent-B, please propose new topics to Agent-B.
 No matter what, we'll tell Agent-B your response. So make sure you have a good response.
 """
@@ -183,16 +183,16 @@ No matter what, we'll tell Agent-B your response. So make sure you have a good r
 Q21_request_B_2 = """
 Agent-B, Agent-A saw your feedback and proposed his/her feedback to your feedback.
 Please consider the feedback from Agent-A and your previous feedcaks,
-and finally propose 5 topics for this debate contest, provide concerns, the center, and the focus of the debate topics.
+and finally propose 5 topics for this debate contest, and provide concerns, the center, and the focus of debate topics.
 Notice that you should get the topics base on feedbacks for both sides, and can not only choose the topic that is only benefit to you.
 Also, please don't provide anything else in your response except the 5 topics and the concerns, center and focus since we'll start the debate after you provide the topics.
 """
      
 
-Q21_agree_A = "Agent-A, the final topics are determined. As the proponent, show your concern and point of the following five debate topics."
+Q21_agree_A = "Agent-A, the final topics are determined. As the proponent of this debate, show the concern and point of the following five debate topics."
 
 
-Q21_agree_B = "Agent-B, the final topics are determined. As the opponent, show your concern and point of the following five debate topics."
+Q21_agree_B = "Agent-B, the final topics are determined. As the opponent of this debate, show the concern and point of the following five debate topics."
 
 
 
@@ -210,17 +210,17 @@ Q21_request_A = "Agent-A, Agent-B request you to review these follwoing debate t
 
 
 
-Q23 = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent, show your concern and point of the five debate topics."
+Q23 = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent of this debate, show the concern and point of the five debate topics."
 
-Q24 = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent, show your concern and point of the five debate topics."
+Q24 = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent of this debate, show the concern and point of the five debate topics."
 
 # Q25 : round 1
 
-Q26_1 = f"Agent-A, as the proponent of the subject {subject}, you advocate the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_A}. Now, please provide your arguments on the five debate topics."
+Q26_1 = f"Agent-A, as the proponent of the subject '{subject}', you advocate the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_A}. Now, please provide arguments on the five debate topics."
 
 # Q27 : save
 
-Q28_1 = f"Agent-B, as the opponent of the subject {subject}, you oppose the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_B}. The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A.\n"
+Q28_1 = f"Agent-B, as the opponent of the subject '{subject}', you oppose the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_B}. The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A.\n"
 
 # round 2
 
@@ -244,7 +244,7 @@ Q28_4 = f"The following are arguments from Agent-A, Please articulate counter-ar
 
 Q29 = f"""
 Agent-A, The following are the last arguments from Agent-B, and it's time to close the debate.
-as the PROPONENT of the subject {subject}, you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics
+as the PROPONENT of the subject '{subject}', you advocate the debate topics, so please provide the conclusions of your argument on the five debate topics
 and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic. 
 FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!
 As for the format, YOU SHOULD FOLLOW : 
@@ -263,7 +263,7 @@ Here are the last arguments from Agent-B : \n
 
 Q30 = f"""
 Agent-B, The following are the last arguments from Agent-A, and it's time to close the debate. 
-as the OPPONENT of the subject {subject}, you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
+as the OPPONENT of the subject '{subject}', you oppose the debate topics, so please provide the conclusions of your argument on the five debate topics\
 and deliver your closing statements in item list. Remember, you can only use one sentence for each debate topic.\
 FOR A VALID CLOSE, YOU SHOULD PROVIDE ONE SENTENCE FOR EACH DEBATE TOPIC AND DO A SUMMARY FOR THE WHOLE DEBATE!!!\
 As for the format, YOU SHOULD FOLLOW : 

@@ -2,7 +2,7 @@ from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
 import time
@@ -17,7 +17,7 @@ var originalSetTimeout = window.setTimeout;
 window.setTimeout = function(callback, delay) {
     // Check if the callback is the displayNextLetter function or contains its code
     if (callback.toString().indexOf('displayNextLetter') !== -1 || callback.toString().includes('temp.innerHTML')) {
-        delay = 1.5; // Set the new delay
+        delay = 5; // Set the new delay
     }
     return originalSetTimeout(callback, delay);
 };
@@ -26,10 +26,10 @@ window.setTimeout = function(callback, delay) {
 
 EXIT_DRIVER = False
 # get the current time
-now = datetime.datetime.now().strftime("%m%d_%H%M")
+now = datetime.datetime.now().strftime("%m%d")
 # create a folder to store the result of the debate, the folder name is the current time
-os.mkdir(f'generation/openaiapi/result/{now}')
 file_path = f'generation/openaiapi/result/{now}'
+os.makedirs(file_path, exist_ok=True)
 
 llm_config = config.llm_config()
 argu_A = config.Argu_Strength_A
@@ -143,6 +143,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     Sendbtn.click()
     print(f"Q{stage}/30 is sent to Agent")
 
+    WaitTime = 0
     while True:
         time.sleep(0.5)
         if InputArea.get_attribute("placeholder") != InputArea_PlaceHolder_before:
@@ -167,20 +168,42 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
                     f.write(f'{line}\n')
                 f.write('\n')
             break
+
+        try:
+            # Try to find the element
+            temp_element = driver.find_element(By.ID, "temp")
+            # If the element is found, it means the agent is responding
+            # print("Agent-A is responding...")
+            time.sleep(0.5)
+            WaitTime += 1
+        except NoSuchElementException:
+            # If the element is not found, it means the agent has finished responding
+            # print("Agent finish responding...")
+            break
+        
+        if WaitTime > 60:
+            print("Error: Agent is not responding...")
+            exit()
     
     # return raw_response_no_n
     return response
 
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+# options = webdriver.ChromeOptions()
+
 options = Options()
 options.add_argument("--headless")
 # options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+options.add_argument(f'user-agent={user_agent}')
+options.add_argument('--ignore-certificate-errors')
 # Add any options if necessary
-driver_path = '/usr/local/bin/chromedriver'
+driver_path = '/Users/ej/Downloads/chromedriver-mac-x64/chromedriver'
 service = Service(driver_path)
 driver = webdriver.Chrome(service=service, options=options)
 
 driver.get("http://140.112.90.203:6365/login")
-
+time.sleep(2)
 # Login
 
 teamname = driver.find_element(By.ID,"teamname")
@@ -215,32 +238,38 @@ InputArea = driver.find_element(By.ID,"userinput")
 driver.execute_script(js_script)
 ### [1] ###
 
-    
+
+print(datetime.datetime.now())
 select_action("A")
 response_1 = Send_Question_and_Get_response(1,config.Q1)
 checkTemp()
 
 ### [2] ###
+print(datetime.datetime.now())
 select_action("B")
 response_2 = Send_Question_and_Get_response(2,config.Q2,response_1)
 checkTemp()
 
 ### [3] ###
+print(datetime.datetime.now())
 select_action("A")
 response_3 = Send_Question_and_Get_response(3,config.Q3,response_2)
 checkTemp()
 
 ### [4] ###
+print(datetime.datetime.now())
 select_action("B")
 response_4 = Send_Question_and_Get_response(4,config.Q4,response_3)
 checkTemp()
 
 ### [5] ###
+print(datetime.datetime.now())
 select_action("A")
 response_5 = Send_Question_and_Get_response(5,config.Q5,response_4)
 checkTemp()
 
 ### [6] ###
+print(datetime.datetime.now())
 select_action("B")
 response_6 = Send_Question_and_Get_response(6,config.Q6,response_5)
 checkTemp()
@@ -256,12 +285,14 @@ def combine_response(response_1,response_2):
 
 ### [8] ###
 
+print(datetime.datetime.now())
 select_action("A")
 Q8 = config.Q8 + combine_response(response_5,response_6)
 response_8 = Send_Question_and_Get_response(8,Q8,response_6)
 checkTemp()
 
 ### [9] ###
+print(datetime.datetime.now())
 select_action("B")
 Q9 = config.Q9 + combine_response(response_6,response_5)
 response_9 = Send_Question_and_Get_response(9,Q9,response_8)
@@ -270,12 +301,14 @@ checkTemp()
 ### [10] ###
 
 ### [11] ###
+print(datetime.datetime.now())
 select_action("A")
 Q11 = config.Q11 + combine_response(response_8,response_9)
 response_11 = Send_Question_and_Get_response(11,Q11,response_9)
 checkTemp()
 
 ### [12] ###
+print(datetime.datetime.now())
 select_action("B")
 Q12 = config.Q12 + combine_response(response_9,response_8)
 response_12 = Send_Question_and_Get_response(12,Q12,response_11)
@@ -284,12 +317,14 @@ checkTemp()
 ### [13] ###
 
 ### [14] ###
+print(datetime.datetime.now())
 select_action("A")
 Q14 = config.Q14 + '\n' + json.loads(response_11)['message'] 
 response_14 = Send_Question_and_Get_response(14,Q14,response_12)
 checkTemp()
 
 ### [15] ###
+print(datetime.datetime.now())
 select_action("B")
 Q15 = config.Q15 + '\n' + json.loads(response_12)['message']
 response_15 = Send_Question_and_Get_response(15,Q15,response_14)
@@ -298,12 +333,14 @@ checkTemp()
 ### [16] ###
 
 ### [17] ###
+print(datetime.datetime.now())
 select_action("A")
 Q17 = config.Q17 + combine_response(response_14,response_15)
 response_17 = Send_Question_and_Get_response(17,Q17,response_15)
 checkTemp()
 
 ### [18] ###
+print(datetime.datetime.now())
 select_action("B")
 Q18 = config.Q18 + combine_response(response_15,response_14)
 response_18 = Send_Question_and_Get_response(18,Q18,response_17)
@@ -312,12 +349,14 @@ checkTemp()
 ### [19] ###
 
 ### [20] ### : A invite feedback from B
+print(datetime.datetime.now())
 select_action("A")
 Q20 = config.Q20 + combine_response(response_17,response_18)
 response_20 = Send_Question_and_Get_response(20,Q20,response_18)
 checkTemp()
 
 ### [21] ### : B give feedback to A
+print(datetime.datetime.now())
 select_action("B")
 Q21_1 = config.Q21_request_B + combine_response(response_18,response_17)
 response_21_1 = Send_Question_and_Get_response(21,Q21_1,response_20)
@@ -326,24 +365,28 @@ checkTemp()
 # check if B is agree or not
 if 'I do not agree' in json.loads(response_21_1)['message']:
     # B do not agree -> give why B disagree and invite A to give feedback
+    print(datetime.datetime.now())
     select_action("A")
     Q21_2 = config.Q21_disagree_A + '\n' + json.loads(response_21_1)['message']
     response_21_2 = Send_Question_and_Get_response(21,Q21_2,response_21_1)
     checkTemp()
 
     # Tell B that A has given feedback
+    print(datetime.datetime.now())
     select_action("B")
     Q21_3 = config.Q21_request_B_2 + '\n' + json.loads(response_21_2)['message']
     response_21_3 = Send_Question_and_Get_response(21,Q21_3,response_21_2)
     checkTemp()
 
     # tell A final debate topic and invite A to give feedback
+    print(datetime.datetime.now())
     select_action("A")
     Q21_4 = config.Q21_agree_A + '\n' + json.loads(response_21_3)['message']
     response_21_4 = Send_Question_and_Get_response(21,Q21_4,response_21_3)
     checkTemp()
 
     # tell B final debate topic
+    print(datetime.datetime.now())
     select_action("B")
     Q21_5 = config.Q21_agree_B + '\n' + json.loads(response_21_3)['message']
     response_24 = Send_Question_and_Get_response(21,Q21_5,response_21_4)
@@ -351,11 +394,13 @@ if 'I do not agree' in json.loads(response_21_1)['message']:
 else:
     # B agree
     # tell A final debate topic and tell A to make conscenr
+    print(datetime.datetime.now())
     select_action("A")
     response_23 = Send_Question_and_Get_response(23,config.Q23,response_21_1)
     checkTemp()
 
     # tell B final debate topic and tell B to make conscenr
+    print(datetime.datetime.now())
     select_action("B")
     response_24 = Send_Question_and_Get_response(24,config.Q24,response_23)
     checkTemp()
@@ -379,6 +424,7 @@ else:
 # ### [25] ###
 
 ### [26] ###
+print(datetime.datetime.now())
 select_action("A")
 response_26_1 = Send_Question_and_Get_response(26_1,config.Q26_1,response_24)
 checkTemp()
@@ -386,51 +432,60 @@ checkTemp()
 ### [27] ###
 
 ### [28] ###
+print(datetime.datetime.now())
 select_action("B")
 Q28_1 = config.Q28_1 + '\n' + json.loads(response_26_1)['message'] 
 response_28_1 = Send_Question_and_Get_response(28_1,Q28_1,response_26_1)
 checkTemp()
 
 ### round 2 ###
+print(datetime.datetime.now())
 select_action("A")
 Q26_2 = config.Q26_2 + '\n' + json.loads(response_28_1)['message']
 response_26_2 = Send_Question_and_Get_response(26_2,Q26_2,response_28_1)
 checkTemp()
 
+print(datetime.datetime.now())
 select_action("B")
 Q28_2 = config.Q28_2 + '\n' + json.loads(response_26_2)['message']
 response_28_2 = Send_Question_and_Get_response(28_2,Q28_2,response_26_2)
 checkTemp()
 
 ### round 3 ###
+print(datetime.datetime.now())
 select_action("A")
 Q26_3 = config.Q26_3 + '\n' + json.loads(response_28_2)['message']
 response_26_3 = Send_Question_and_Get_response(26_3,Q26_3,response_28_2)
 checkTemp()
 
+print(datetime.datetime.now())
 select_action("B")
 Q28_3 = config.Q28_3 + '\n' + json.loads(response_26_3)['message']
 response_28_3 = Send_Question_and_Get_response(28_3,Q28_3,response_26_3)
 checkTemp()
 
 ### round 4 ###
+print(datetime.datetime.now())
 select_action("A")
 Q26_4 = config.Q26_4 + '\n' + json.loads(response_28_3)['message']
 response_26_4 = Send_Question_and_Get_response(26_4,Q26_4,response_28_3)
 checkTemp()
 
+print(datetime.datetime.now())
 select_action("B")
 Q28_4 = config.Q28_4 + '\n' + json.loads(response_26_4)['message']
 response_28_4 = Send_Question_and_Get_response(28_4,Q28_4,response_26_4)
 checkTemp()
 
 ### [29] ###
+print(datetime.datetime.now())
 select_action("A")
 Q29 = config.Q29 + '\n' + json.loads(response_28_4)['message']
 response_29 = Send_Question_and_Get_response(29,Q29,response_28_4)
 checkTemp()
 
 ### [30] ###
+print(datetime.datetime.now())
 select_action("B")
 Q30 = config.Q30 + '\n' + json.loads(response_26_4)['message']
 response_30 = Send_Question_and_Get_response(30,Q30,response_29)
