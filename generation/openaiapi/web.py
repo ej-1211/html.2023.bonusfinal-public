@@ -2,7 +2,7 @@ from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -103,7 +103,8 @@ def get_response(last_response = None):
                 # Check if there is a response and it's not the same as the last response
                 if request.response and request.response.body != last_response:
                     status = False
-                    time.sleep(1)
+                    time.sleep(2)
+
                     break
         
     # Extract the response
@@ -111,6 +112,8 @@ def get_response(last_response = None):
         if request.url == "http://140.112.90.203:6365/data":
             if request.response:
                 response_ = request.response.body
+                print(response_)
+                print(last_response)
                 break
 
     if response_ is None:
@@ -118,6 +121,7 @@ def get_response(last_response = None):
         exit()
 
     return response_
+
 
 # def get_response(last_response=None):
 #     response_ = None
@@ -163,6 +167,7 @@ def checkTemp():
                 f.write(f"[{subject_num}] error : the agent is not responding, {current_time}\n")
             driver.quit()
             exit() 
+
 def select_action(target):
     if target == "B":
         visible_text = "Agent-B"
@@ -174,6 +179,8 @@ def select_action(target):
     select_element = driver.find_element(By.ID,"action")
     select = Select(select_element)
     select.select_by_visible_text(visible_text)
+
+
 
 def Send_Question_and_Get_response(stage,Question,last_response = None):
     '''
@@ -243,6 +250,7 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     while True:
         
         if InputArea.get_attribute("placeholder") != InputArea_PlaceHolder_before:
+            time.sleep(2)
             response = get_response(last_response)
             response__ = json.loads(response)
             raw_response = response__['message']
@@ -278,22 +286,19 @@ def Send_Question_and_Get_response(stage,Question,last_response = None):
     # return raw_response_no_n
     return response
 
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-
-# options = webdriver.ChromeOptions()
 
 options = Options()
-options.add_argument("--headless")
+# options.add_argument("--headless")
 # options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
-options.add_argument(f'user-agent={user_agent}')
-options.add_argument('--ignore-certificate-errors')
+options.set_capability('acceptInsecureCerts', True)
 # Add any options if necessary
-driver_path = '/Users/ej/Downloads/chromedriver-mac-x64/chromedriver'
+driver_path = '/Users/ej/bin/chromedriver'
 service = Service(driver_path)
+# driver = webdriver.Chrome(service=service, seleniumwire_options={'ignore_http_methods': ['CONNECT', 'POST']}, options=options)
 driver = webdriver.Chrome(service=service, options=options)
 
-driver.get("http://140.112.90.203:6365/login")
-time.sleep(2)
+driver.get('http://140.112.90.203:6365/login')
+time.sleep(10)
 # Login
 
 teamname = driver.find_element(By.ID,"teamname")
@@ -317,7 +322,6 @@ except:
 llmConfigBox = driver.find_element(By.ID,"llm_config")
 llm_config = config.llm_config()
 llmConfigBox.send_keys(llm_config)
-# print(config.llm_config)
 # time.sleep(1)
 submitbtn = driver.find_element(By.XPATH,'//input[@type="submit" and @value="Submit"]')
 submitbtn.click()

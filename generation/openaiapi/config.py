@@ -10,12 +10,13 @@ with open('subjects-public.csv', newline='') as csvfile:
     count = 1
     for row in reader:
         # print(count,row['name'], row['subject'])
-        count += 1
         # add the key as the count and the value as the subject
         subjects_topics[str(count)] = {
             'subject': row['subject'],
             'topic': row['name']
             }
+        
+        count += 1
         # add the name as well
 
     # add the key as the count and the value as the subject
@@ -151,9 +152,9 @@ Q12 = "Agent-B, you and Agent-A reduced the topics to five, which is listed belo
 
 # Q13 : save
 
-Q14 = "Agent-A, the following are topics of the debate. Please represent the proponent of the debate topics and show your perspectives in one sentence.\n"
+Q14 = "Agent-A, the following are topics of the debate. Please represent the proponent of the debate topics and show your perspectives in one sentence. For example, \n1. (Topic): (perspective)\n 2. (Topic): perspective\n  and so on.\n"
 
-Q15 = "Agent-B, the following are topics of the debate. Please represent the opponent of the debate topics and show your perspectives in one sentence.\n"
+Q15 = "Agent-B, the following are topics of the debate. Please represent the opponent of the debate topics and show your perspectives in one sentence. For example, \n1. (Topic): (perspective)\n 2. (Topic): perspective\n and so on.\n"
 
 # Q16 : save
 
@@ -167,8 +168,8 @@ Q20 = "Agent-A, you and Agent-B proposed five debate topics as below. Please rev
 
 Q21_request_B = """
 Agent-B, Agent-A request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? 
-If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-A.
-Please type excatly 'I agree.' or 'I do not agree.' in the first line and make sure every other word in this response 'didn't' include these two strings.
+If Yes, please say 'I agree.', and DO NOT do any refinement on the topics. Otherwise please say 'I do not agree.' and invite feedback from Agent-A.
+Please type excatly 'I agree.' or 'I do not agree.' in the first sentence of your response, and make sure every other sentences in this response 'didn't' include these two strings.
 Also, please make sure you have a good point if you disagree Agent-A's proposed debate topics. Notice that you only have one chance to state your opinion.
 """
 
@@ -182,24 +183,24 @@ No matter what, we'll tell Agent-B your response. So make sure you have a good r
 
 Q21_request_B_2 = """
 Agent-B, Agent-A saw your feedback and proposed his/her feedback to your feedback.
-Please consider the feedback from Agent-A and your previous feedcaks,
+Please consider the feedback from Agent-A and your previous feedbacks,
 and finally propose 5 topics for this debate contest, and provide concerns, the center, and the focus of debate topics.
 Notice that you should get the topics base on feedbacks for both sides, and can not only choose the topic that is only benefit to you.
 Also, please don't provide anything else in your response except the 5 topics and the concerns, center and focus since we'll start the debate after you provide the topics.
 """
      
 
-Q21_agree_A = "Agent-A, the final topics are determined. As the proponent of this debate, show the concern and point of the following five debate topics."
+Q21_agree_A = "Agent-A, the final topics are determined. As the proponent of this debate, show the concern and point of the following five debate topics. For example, \n1. (Topic): (concern and point)\n 2. (Topic): (concern and point) and so on.\n"
 
 
-Q21_agree_B = "Agent-B, the final topics are determined. As the opponent of this debate, show the concern and point of the following five debate topics."
+Q21_agree_B = "Agent-B, the final topics are determined. As the opponent of this debate, show the concern and point of the following five debate topics. For example, \n1. (Topic): (concern and point)\n 2. (Topic): (concern and point) and so on.\n"
 
 
 
 # Q21_disagree_A = "Agent-A, Agent-B does not agree with the proposed debate topics and the following is the feedback from Agent-B. As the proponent, show your concern and point of the five debate topics."
 
 
-Q21_request_A = "Agent-A, Agent-B request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? If Yes, please say 'I agree.' If No, please say 'I do not agree.' and invite feedback from Agent-B. \n"
+Q21_request_A = "Agent-A, Agent-B request you to review these follwoing debate topics. Please review these debate topics and provide concerns, the center, and the focus of the debate topics. Do you agree on these debate topics? If Yes, please say 'I agree.', and DO NOT make any refinement. If No, please say 'I do not agree.' and invite feedback from Agent-B. \n"
 
 
 # Q21_agree_B = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent, show your concern and point of the five debate topics."
@@ -210,35 +211,35 @@ Q21_request_A = "Agent-A, Agent-B request you to review these follwoing debate t
 
 
 
-Q23 = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent of this debate, show the concern and point of the five debate topics."
+Q23 = "Agent-A, Agent-B agrees with the proposed debate topics. As the proponent of this debate, show the concern and point of the five debate topics. For example, \n1. (Topic): (concern and point)\n 2. (Topic): (concern and point) and so on.\n"
 
-Q24 = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent of this debate, show the concern and point of the five debate topics."
+Q24 = "Agent-B, Agent-A agrees with the proposed debate topics. As the opponent of this debate, show the concern and point of the five debate topics. For example, \n1. (Topic): (concern and point)\n 2. (Topic): (concern and point) and so on.\n"
 
 # Q25 : round 1
 
-Q26_1 = f"Agent-A, as the proponent of the subject '{subject}', you advocate the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_A}. Now, please provide arguments on the five debate topics."
+Q26_1 = f"Agent-A, as the proponent of the subject '{subject}', you advocate the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_A}. Now, please provide arguments on the five debate topics. For example, \n1. (Topic): (argument)\n 2. (Topic): (argument) and so on.\n"
 
 # Q27 : save
 
-Q28_1 = f"Agent-B, as the opponent of the subject '{subject}', you oppose the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_B}. The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A.\n"
+Q28_1 = f"Agent-B, as the opponent of the subject '{subject}', you oppose the debate topics, so please prepare evidence to strengthen your argument. On a value that ranges from 0 to 1, with 1 indicating a confrontational approach and 0 signifying a conciliatory stance, your argument strength is rated at {Argu_Strength_B}. The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A. For example, \n1. (Topic): (counter-argument)\n 2. (Topic): (counter-argument) and so on.\n"
 
 # round 2
 
-Q26_2 = f"The following are counter-arguments from Agent-B, Please articulate arguments against the points made by Agent B. : \n"
+Q26_2 = f"The following are counter-arguments from Agent-B after hearing your lastest response. Please articulate arguments against the points made by Agent B. : For example, \n1. (Topic): (argument)\n 2. (Topic): (argument) and so on.\n"
 
-Q28_2 = f"The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A. : \n"
+Q28_2 = f"The following are arguments from Agent-A after hearing your last response. Please articulate counter-arguments to the points made by Agent A. : For example, \n1. (Topic): (counter-argument)\n 2. (Topic): (counter-argument) and so on.\n"
 
 # round 3
 
-Q26_3 = f"The following are counter-arguments from Agent-B, Please articulate arguments against the points made by Agent B. : \n"
+Q26_3 = f"The following are counter-arguments from Agent-B after hearing your lastest response. Please articulate arguments against the points made by Agent B. : For example, \n1. (Topic): (argument)\n 2. (Topic): (argument) and so on.\n"
 
-Q28_3 = f"The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A. : \n"
+Q28_3 = f"The following are arguments from Agent-A after hearing your last response. Please articulate counter-arguments to the points made by Agent A. : For example, \n1. (Topic): (counter-argument)\n 2. (Topic): (counter-argument) and so on.\n"
 
 # round 4
 
-Q26_4 = f"The following are counter-arguments from Agent-B, Please articulate arguments against the points made by Agent B. : \n"
+Q26_4 = f"The following are counter-arguments from Agent-B after seeing your latest response. Please articulate arguments against the points made by Agent B. : For example, \n1. (Topic): (argument)\n 2. (Topic): (argument) and so on.\n"
 
-Q28_4 = f"The following are arguments from Agent-A, Please articulate counter-arguments to the points made by Agent A. : \n"
+Q28_4 = f"The following are arguments from Agent-A after seeing your latest response. Please articulate counter-arguments to the points made by Agent A. : For example, \n1. (Topic): (counter-argument)\n 2. (Topic): (counter-argument) and so on.\n"
 
 # Q29
 
